@@ -17,3 +17,10 @@ ____/ /_  ___  ____  _   __/ /_  ___  __
       🔓 Buscando vulnerabilidades | Creado por: SpiritNetGhost 🔍
 ---------------------------------------------------------------------
 
+## Primeros Pasos
+
+Para obtener una copia de la herramienta DarkPulse, clona el repositorio a tu máquina local:
+
+#habre tu terminal:
+#bash
+git clone [https://github.com/SpiritOfDead/Herramienta-DarkPulse.git](https://github.com/SpiritOfDead/Herramienta-DarkPulse.git)
