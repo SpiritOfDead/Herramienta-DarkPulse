@@ -1,0 +1,47 @@
+FUNCIONAMIENTO
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+DarkPulseV11 es una herramienta de ciberseguridad ofensiva automatizada, diseñada para realizar un proceso completo de reconocimiento, análisis de vulnerabilidades y explotación. El script está optimizado para la eficiencia y opera en una secuencia de fases lógicas para evaluar la seguridad de los dispositivos en una red.
+------------------------------------
+1. Escaneo de la Red
+
+El proceso comienza con un escaneo rápido de tipo ping (-sn) utilizando Nmap para identificar todos los hosts activos dentro del rango de IP especificado. Esto asegura que solo se analicen dispositivos que están en línea, optimizando el tiempo de ejecución.
+---------------------------------------------------------------------
+2. Detección de Servicios y OS
+
+Una vez que se encuentran los hosts activos, el script realiza un escaneo más profundo (-O -sV). En esta fase, se identifica:
+
+    Los puertos abiertos.
+
+    Los servicios que se ejecutan en cada puerto (por ejemplo, Apache, SSH, SMB).
+
+    El sistema operativo (OS) del dispositivo.
+--------------------------------------------------------------------------------
+3. Búsqueda y Priorización de Vulnerabilidades
+
+Con la información de los servicios y el OS, el script consulta la base de datos de la API de Vulners.com. Busca vulnerabilidades conocidas que coincidan con los servicios y versiones detectados.
+
+    Priorización: La herramienta filtra las vulnerabilidades, enfocándose solo en aquellas con un puntaje CVSS de 7.0 o superior, lo que garantiza que solo se consideren las debilidades más críticas.
+---------------------------------------------------------------------------------
+4. Explotación Automática
+
+Si se encuentra una vulnerabilidad crítica, el script se conecta a Metasploit Framework (vía MSF-RPC) para intentar explotarla de forma automática.
+
+    Selecciona un exploit compatible.
+
+    Configura una reverse shell como carga útil (payload).
+
+    Si la explotación es exitosa, se establece una conexión al sistema de la víctima.
+-----------------------------------------------------------------------------------------------------------------
+5. Acciones Post-Explotación
+
+Para garantizar que el acceso al sistema comprometido se mantenga, el script realiza dos tareas clave:
+
+    Persistencia: Intenta añadir una tarea en crontab en el sistema de la víctima para restablecer la conexión inversa de manera periódica.
+
+    Limpieza de huellas: El script intenta eliminar registros de actividad (auth.log, syslog) para cubrir sus rastros.
+------------------------------------------------------------------------------------------------------------
+6. Reporte Final
+
+Al finalizar la operación, el script genera un reporte detallado en formato JSON (darkpulse_v11_reporte.json). Este reporte incluye un resumen de todos los hosts analizados, los servicios detectados y las vulnerabilidades encontradas, proporcionando una visión completa de la evaluación de seguridad.
+----------------------------------------------------------------------------------------------------
