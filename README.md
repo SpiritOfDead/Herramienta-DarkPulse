@@ -23,8 +23,9 @@ Para obtener una copia de la herramienta DarkPulse, clona el repositorio a tu m�
 
 #habre tu terminal:
 #bash
+--------------------------------------------------------------------------------------------------------------------------------
 git clone [https://github.com/SpiritOfDead/Herramienta-DarkPulse.git](https://github.com/SpiritOfDead/Herramienta-DarkPulse.git)
-
+--------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
 ⚠️ Advertencia: Uso con Fines Educativos y Éticos ⚠️
 
@@ -46,18 +47,18 @@ El desarrollador no se hace responsable por el uso malintencionado, ilegal o no 
 
 El script depende de varias librerías de Python que no vienen por defecto. Puedes instalarlas todas de una vez usando pip:
 Bash
-
+--------------------------------------------------------------------------------------------------------------------------------
 pip install requests python-nmap
-
+--------------------------------------------------------------------------------------------------------------------------------
     requests: Se usa para realizar las consultas a la API de Vulners.com.
 
     python-nmap: Es la librería que permite al script interactuar con Nmap.
 
 Además, para que la función de explotación funcione, necesitas la librería python-msfrpc. Aunque el script puede ejecutarse sin ella, la funcionalidad de Metasploit no estará disponible.
 Bash
-
+--------------------------------------------------------------------------------------------------------------------------------
 pip install python-msfrpc
-
+--------------------------------------------------------------------------------------------------------------------------------
 3. Configuración Adicional
 
     API de Vulners.com: El script realiza búsquedas de vulnerabilidades a través de su API. Aunque no se requiere una clave para las consultas básicas, es importante que tengas conexión a internet para que esta funcionalidad trabaje.
@@ -65,10 +66,11 @@ pip install python-msfrpc
     Servidor Metasploit RPC: Antes de ejecutar el script, debes iniciar el servicio de Metasploit RPC. Esto permite que el script se conecte a Metasploit de forma remota para ejecutar los exploits. Puedes iniciar el servidor RPC con un comando similar a este:
 
 Bash
-
+--------------------------------------------------------------------------------------------------------------------------------
 msfconsole -x "load msgrpc ServerPassword=micontraseña"
-
+--------------------------------------------------------------------------------------------------------------------------------
 Nota: El script está configurado para conectarse con la contraseña que establezcas en el comando de ejecución.
+--------------------------------------------------------------------------------------------------------------------------------
 
 Cómo Ejecutar el Script
 
@@ -76,7 +78,7 @@ Una vez que tengas todos los requisitos, puedes ejecutar la herramienta con el s
 
 Bash
 -------------------------------------------------------------------------------------
-python DarkPulseV1.py --rango_ip "192.168.1.0/24" --metasploit_pass "micontraseña"
+python DarkPulseV1.py --rango_ip "IP VICTIMA" --metasploit_pass "micontraseña"
 ---------------------------------------------------------------------------------------
 metodo 2 para ejecutar el scrip:
 Abrir tu terminal
