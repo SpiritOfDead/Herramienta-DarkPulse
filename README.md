@@ -1,4 +1,4 @@
-# DarkPulseV11: Herramienta de Ciberseguridad Ofensiva ⚡️
+# DarkPulseV1: Herramienta de Ciberseguridad Ofensiva ⚡️
 
 Una potente herramienta en Python diseñada para automatizar el reconocimiento de red, el escaneo de vulnerabilidades y la explotación de sistemas. **DarkPulseV11** utiliza Nmap y Metasploit para identificar y comprometer objetivos, proporcionando a los pentesters una solución eficiente para evaluar la seguridad de la red.
 
